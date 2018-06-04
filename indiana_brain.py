@@ -18,6 +18,7 @@ class Game(object):
         self.gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption('NeuroBalancer')
         self.clock = pygame.time.Clock()
+        self.player = [19,2]
         self.map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1],
                     [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1],
@@ -52,15 +53,33 @@ class Game(object):
     def draw_end(self, x, y):
         pygame.draw.circle(self.gameDisplay, black, (x*BLOCK_WIDTH+BLOCK_WIDTH//2, y*BLOCK_WIDTH+BLOCK_WIDTH//2), BLOCK_WIDTH//2)
 
+    def draw_player(self, x, y):
+        pygame.draw.circle(self.gameDisplay, black, (x*BLOCK_WIDTH+BLOCK_WIDTH//2, y*BLOCK_WIDTH+BLOCK_WIDTH//2), BLOCK_WIDTH//2)
+        pygame.draw.circle(self.gameDisplay, green, (x*BLOCK_WIDTH+BLOCK_WIDTH//2, y*BLOCK_WIDTH+BLOCK_WIDTH//2), BLOCK_WIDTH//4)
+
     def draw_map(self):
         for y,row in enumerate(self.map):
             for x,block in enumerate(row):
                 if block == 1:
                     pygame.draw.rect(self.gameDisplay, black,(x*BLOCK_WIDTH,y*BLOCK_WIDTH, BLOCK_WIDTH,BLOCK_WIDTH) )
+                elif block == 2:
+                    self.draw_player(x, y)
                 elif block == 3:
                     self.draw_treasure(x, y)
                 elif block == 4:
                     self.draw_end(x, y)
+
+    def move_player(self, dy, dx):
+        try:
+            if self.map[self.player[0] + dy][self.player[1] + dx] == 1:
+                return False
+        except IndexError:
+            return False
+        self.map[self.player[0]][self.player[1]] = 0
+        self.player[0] += dy
+        self.player[1] += dx
+        self.map[self.player[0]][self.player[1]] = 2
+
     def start(self):
         end = False
         while not end:
@@ -72,6 +91,14 @@ class Game(object):
                         pass
                     if event.key == pygame.K_q:
                         end = True
+                    if event.key == pygame.K_w:
+                        self.move_player(-1, 0)
+                    if event.key == pygame.K_a:
+                        self.move_player(0, -1)
+                    if event.key == pygame.K_s:
+                        self.move_player(1, 0)
+                    if event.key == pygame.K_d:
+                        self.move_player(0, 1)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         pass
@@ -82,6 +109,6 @@ class Game(object):
             self.gameDisplay.fill(white)
             self.draw()
             pygame.display.update()
-            self.clock.tick(1)
+            self.clock.tick(30)
 a = Game()
 a.start()
